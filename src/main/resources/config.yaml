@@ -1,0 +1,13 @@
+host: &host 
+  val: "localhost"
+
+proc: 
+  host: *host
+  port: "8082"
+  
+sys:
+  host: *host
+  port: "8083"
+
+
+  
