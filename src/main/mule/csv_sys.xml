@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <http:listener-config name="csv_sys-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="csv_sys-config" api="resource::1a6f614f-782b-4f62-a5bd-e043a80391c6:csv_sys:1.0.2:raml:zip:csv_sys.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="csv_sys-main">
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e3ed41f1-6680-47bc-9a69-4a263da8ce84" >
+		<http:request-connection host="${sys.host}" port="${sys.port}" />
+	</http:request-config>
+	<flow name="csv_sys-main">
         <http:listener config-ref="csv_sys-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -124,41 +127,18 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\client:application\json:csv_sys-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "Created/deleted clients records"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name='"Entering put_sys"' doc:id="613f8995-e81c-47d1-8627-181297960799" message='#["Entering put_sys"]'/>
+		<http:request method="PUT" doc:name="puts_sys" doc:id="c34b3096-c1ae-4e40-ad42-15df169e2c2f" config-ref="HTTP_Request_configuration" path="/client"/>
+		<logger level="INFO" doc:name='"Returning from put_sys"' doc:id="6aca8062-4324-4480-a763-a3b23a0c1682" message='#["Returning from put_sys"]'/>
     </flow>
     <flow name="get:\client:csv_sys-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  status_code: 404,
-  reason_phrase: "Resource not found.",
-  description: "Client/file not found."
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name='"Entering get_sys"' doc:id="e61823bb-bfaf-453f-b69e-2189729e0791" message='"Entering get_sys"'/>
+		<http:request method="GET" doc:name="get_sys" doc:id="066cf0b2-26ac-47af-a1af-4f6648a29b0a" config-ref="HTTP_Request_configuration" path="/client"/>
+		<logger level="INFO" doc:name='"Returning from get_sys"' doc:id="7d4e09a1-c48d-4ea8-80c7-9fcb0a02562f" message='#["Returning from get_sys"]'/>
     </flow>
     <flow name="post:\client:application\json:csv_sys-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "Created client record"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name='"Entering post_sys"' doc:id="4190a4aa-640b-4c15-a2e2-71e1a0ff41b0" />
+		<http:request method="POST" doc:name="post_sys" doc:id="8a53481a-8345-4510-a35c-3e55f880208b" config-ref="HTTP_Request_configuration" path="/client"/>
+		<logger level="INFO" doc:name='"Returning from post_sys"' doc:id="53cc9ca3-c5a0-47ea-bb4b-f4deaae868e8" message='#["Returning from post_sys"]'/>
     </flow>
 </mule>
