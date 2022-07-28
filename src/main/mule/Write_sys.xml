@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="post_sys" doc:id="1ed0b783-001b-40cc-a0b5-671fb06b680d" >
+		<logger level="INFO" doc:name="Entered post_sys" doc:id="dbe8cde1-6ada-4559-8dda-26fbcc3b2d0a" message="Entered post_sys"/>
+		<set-variable value="#[payload]" doc:name="client" doc:id="50611112-fb0f-42d5-adba-2a9cc24540fd" variableName="client"/>
+		<file:list doc:name="List" doc:id="31e4ea43-e78b-44f5-a20b-fc8c767ff8f1" config-ref="File_Config" directoryPath="${folder.name}"/>
+		<choice doc:name="Choice" doc:id="dd69ebdc-520e-4c36-a3e2-bd18cd30f366" >
+			<when expression='#[payload.attributes.name contains "Customers-PRD.csv"]'>
+				<logger level="INFO" doc:name="entered FileExists branch" doc:id="762de3a8-6d77-40e7-8db2-56a94c19018a" />
+				<set-payload value="#[vars.client]" doc:name="client" doc:id="c3cf3038-15ce-468c-8f45-f922e2205fbf" />
+				<ee:transform doc:name="client to csv" doc:id="533c86e7-60f0-4741-8577-5b1ff54d1ee6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv header=false
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<file:write doc:name="record row to file" doc:id="031bbf6f-872e-4cf7-8c1f-0e2bb7267781" config-ref="File_Config" path="${file.name}" mode="APPEND"/>
+				<logger level="INFO" doc:name="Written record to file" doc:id="8247d3b6-3c4d-4a31-8aa6-2044153f93a7" message="Written record to file"/>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="entered Default branch" doc:id="648f3948-990a-480f-b363-8eeef1bb345d" message="entered Default branch"/>
+				<set-payload value="#[vars.client]" doc:name="client" doc:id="06e460e1-f794-49c3-9cd8-be8ca704b5d2" />
+				<ee:transform doc:name="client to csv" doc:id="ab1de433-f737-4c57-ae25-3adb07f064e0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv header=true
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<file:write doc:name="header and record to file" doc:id="5231f446-862d-4c81-95c6-dc9c0d15ff87" config-ref="File_Config" path="${file.name}" mode="APPEND" />
+				<logger level="INFO" doc:name="Written header and record to file" doc:id="89d05c39-c02b-45ac-b6d5-f956dda8f2ec" message="Written header and record to file" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="put_sys" doc:id="1bb65ee0-a183-4e0b-861a-0926d445a1fd" >
+		<logger level="INFO" doc:name="Entered put_sys" doc:id="3ac98295-7a37-48f6-a08d-b8ad1f679841" message="Entered put_sys"/>
+		<choice doc:name="Choice" doc:id="748ab6be-7ee0-46e1-b175-09d5530b9605" >
+			<when expression='#[isEmpty(payload)]'>
+				<logger level="INFO" doc:name="entered singleClient branch" doc:id="1dfd96f5-6803-43dd-bbdc-eacb36dd8003" message="entered FileExists branch"/>
+				<file:delete doc:name="Delete" doc:id="f7a288af-b2e5-4a0a-8443-1ab577273e17" config-ref="File_Config" path="${file.name}"/>
+				<ee:transform doc:name="Success" doc:id="201cfb82-9669-40b7-838a-392dad33fffe" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Success!"}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="entered Default branch" doc:id="0ae92fc9-6192-4714-8ae1-33b8ba19a75e" message="entered Default branch"/>
+				<ee:transform doc:name="Transform Message" doc:id="9347a955-dcf3-45ed-bdac-5bded4ba0b6b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<file:write doc:name="Write" doc:id="6f03d440-9c4e-4c23-86a1-fed2f2def3eb" config-ref="File_Config" path="${file.name}"/>
+				<ee:transform doc:name="Success" doc:id="589854aa-b07d-4eff-8e0f-a116a8fea60d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Success!"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

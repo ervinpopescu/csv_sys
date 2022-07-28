@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="csv_sys-httpListenerConfig">
+        <http:listener-connection host="${sys.host}" port="${sys.port}" />
+    </http:listener-config>
+    <apikit:config name="csv_sys-config" api="resource::1a6f614f-782b-4f62-a5bd-e043a80391c6:csv_sys:1.0.5:raml:zip:csv_sys.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="ebe93050-b646-48e3-83da-68ade76ae87f">
+        <http:request-connection host="${sys.host}" port="${sys.port}" />
+    </http:request-config>
+    <file:config name="File_Config" doc:name="File Config" doc:id="8ac97f96-3366-4c53-80f8-c2d4c73e41a2">
+        <file:connection workingDir="${folder.name}" />
+    </file:config>
+    <configuration-properties doc:name="Configuration properties" doc:id="bcca6536-41a7-429c-98c7-ad8cd02ed27c" file="config.yaml" />
+</mule>

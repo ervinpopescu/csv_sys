@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get_sys" doc:id="d9100b22-8746-42c6-8841-6011d8d23389" >
+		<logger level="INFO" doc:name="Entered get_sys" doc:id="a5e100eb-ce03-49ae-a13d-ccc6f8d2a828" message="Entered get_sys"/>
+		<file:read doc:name="Read" doc:id="5e3619dd-32c9-42ba-8d6f-f319c028bd25" config-ref="File_Config" path="${file.name}" />
+		<ee:transform doc:name="csv to json" doc:id="bff83c77-914d-4115-8898-2248b7a61307">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="53e84278-705d-4694-9a10-fcfc5401210b" type="FILE:ILLEGAL_PATH">
+				<ee:transform doc:name="No file" doc:id="bc0bd592-4a3f-43f6-8175-0ec9326c5671" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message:"No files or records found inside the folder."} ]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

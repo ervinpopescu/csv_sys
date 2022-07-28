@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
-    <http:listener-config name="csv_sys-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
-    </http:listener-config>
-    <apikit:config name="csv_sys-config" api="resource::1a6f614f-782b-4f62-a5bd-e043a80391c6:csv_sys:1.0.2:raml:zip:csv_sys.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e3ed41f1-6680-47bc-9a69-4a263da8ce84" >
-		<http:request-connection host="${sys.host}" port="${sys.port}" />
-	</http:request-config>
-	<flow name="csv_sys-main">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="csv_sys-main">
         <http:listener config-ref="csv_sys-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -126,19 +119,34 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="put:\client:application\json:csv_sys-config">
-		<logger level="INFO" doc:name='"Entering put_sys"' doc:id="613f8995-e81c-47d1-8627-181297960799" message='#["Entering put_sys"]'/>
-		<http:request method="PUT" doc:name="puts_sys" doc:id="c34b3096-c1ae-4e40-ad42-15df169e2c2f" config-ref="HTTP_Request_configuration" path="/client"/>
-		<logger level="INFO" doc:name='"Returning from put_sys"' doc:id="6aca8062-4324-4480-a763-a3b23a0c1682" message='#["Returning from put_sys"]'/>
+    <flow name="put:\client:csv_sys-config">
+        <logger level="INFO" doc:name="&quot;Entering put_sys&quot;" doc:id="613f8995-e81c-47d1-8627-181297960799" message="#[&quot;Entering put_sys&quot;]" />
+        <flow-ref doc:name="put_sys" doc:id="0f3a3afa-8435-410b-9dcd-d82a4ad2dfef" name="put_sys" />
+        <logger level="INFO" doc:name="&quot;Returning from put_sys&quot;" doc:id="6aca8062-4324-4480-a763-a3b23a0c1682" message="#[&quot;Returning from put_sys&quot;]" />
     </flow>
     <flow name="get:\client:csv_sys-config">
-		<logger level="INFO" doc:name='"Entering get_sys"' doc:id="e61823bb-bfaf-453f-b69e-2189729e0791" message='"Entering get_sys"'/>
-		<http:request method="GET" doc:name="get_sys" doc:id="066cf0b2-26ac-47af-a1af-4f6648a29b0a" config-ref="HTTP_Request_configuration" path="/client"/>
-		<logger level="INFO" doc:name='"Returning from get_sys"' doc:id="7d4e09a1-c48d-4ea8-80c7-9fcb0a02562f" message='#["Returning from get_sys"]'/>
+        <logger level="INFO" doc:name="&quot;Entering get_sys&quot;" doc:id="e61823bb-bfaf-453f-b69e-2189729e0791" message="&quot;Entering get_sys&quot;" />
+        <flow-ref doc:name="get_sys" doc:id="d3b43452-68d4-4ae8-9d3c-664bbf2b9cc0" name="get_sys" />
+        <logger level="INFO" doc:name="&quot;Returning from get_sys&quot;" doc:id="7d4e09a1-c48d-4ea8-80c7-9fcb0a02562f" message="#[&quot;Returning from get_sys&quot;]" />
+        <error-handler>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="04dfaf79-def0-442d-9a4a-1e20ffcc99db" type="FILE:ILLEGAL_PATH">
+                <ee:transform doc:name="No file" doc:id="37801e02-693a-4304-b7f9-8dcb84649aba">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message:"No files or records found inside the folder."}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
     </flow>
     <flow name="post:\client:application\json:csv_sys-config">
-		<logger level="INFO" doc:name='"Entering post_sys"' doc:id="4190a4aa-640b-4c15-a2e2-71e1a0ff41b0" />
-		<http:request method="POST" doc:name="post_sys" doc:id="8a53481a-8345-4510-a35c-3e55f880208b" config-ref="HTTP_Request_configuration" path="/client"/>
-		<logger level="INFO" doc:name='"Returning from post_sys"' doc:id="53cc9ca3-c5a0-47ea-bb4b-f4deaae868e8" message='#["Returning from post_sys"]'/>
+        <logger level="INFO" doc:name="&quot;Entering post_sys&quot;" doc:id="4190a4aa-640b-4c15-a2e2-71e1a0ff41b0" />
+        <flow-ref doc:name="post_sys" doc:id="d7432f6f-d831-4735-8f12-a47da38ee87b" name="post_sys" />
+        <logger level="INFO" doc:name="&quot;Returning from post_sys&quot;" doc:id="53cc9ca3-c5a0-47ea-bb4b-f4deaae868e8" message="#[&quot;Returning from post_sys&quot;]" />
     </flow>
 </mule>

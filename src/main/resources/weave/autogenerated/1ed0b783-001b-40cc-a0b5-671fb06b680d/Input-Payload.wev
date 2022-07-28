@@ -1,0 +1,17 @@
+%dw 2.0
+
+type auto_1ed0b783_001b_40cc_a0b5_671fb06b680d_Input_Payload = {
+  billing_street: String, 
+  billing_city: String, 
+  billing_postal_code: String, 
+  billing_state: String, 
+  birth_date: String, 
+  billing_country: String, 
+  last_name: String, 
+  weight: String, 
+  created_date: String, 
+  first_name: String, 
+  height: String, 
+  _?: Any
+}
+

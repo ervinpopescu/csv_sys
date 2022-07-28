@@ -1,13 +1,11 @@
-host: &host 
-  val: "localhost"
-
-proc: 
-  host: *host
-  port: "8082"
-  
 sys:
-  host: *host
+  host: "localhost"
   port: "8083"
-
+  
+file:
+  name: "Customers-PRD.csv"
+  
+folder:
+  name: "C:/Users/Ervin Popescu/Desktop/csv_folder"
 
   
